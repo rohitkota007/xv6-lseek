@@ -183,7 +183,7 @@ UPROGS=\
 	_zombie\
 	_test\
 
-fs.img: mkfs README $(UPROGS)
+fs.img: mkfs README test.txt $(UPROGS)
 	./mkfs fs.img README test.txt $(UPROGS)
 
 -include *.d
@@ -209,7 +209,7 @@ print: xv6.pdf
 
 bochs : fs.img xv6.img
 	if [ ! -e .bochsrc ]; then ln -s dot-bochsrc .bochsrc; fi
-	bochs -q
+	bochs -qh
 
 # try to generate a unique GDB port
 GDBPORT = $(shell expr `id -u` % 5000 + 25000)
