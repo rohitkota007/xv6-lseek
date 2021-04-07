@@ -38,3 +38,7 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+
+#define SEEK_SET    0
+#define SEEK_CUR    1
+#define SEEK_END    2
