@@ -447,7 +447,7 @@ int
 sys_lseek(void)
 {
   struct file *f;
-  signed int offset, newoffset=0;
+  signed int offset;
   int position, count; 
   int fd;
   char *ptr;
