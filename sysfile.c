@@ -442,3 +442,39 @@ sys_pipe(void)
   fd[1] = fd1;
   return 0;
 }
+
+int 
+sys_lseek(void)
+{
+  struct file *f;
+  signed int offset, newoffset=0;
+  int position, count; 
+  int fd;
+  char *ptr;
+  argfd(0, &fd, &f);
+  argint(1, &offset);
+  argint(2, &position);
+  if(position == SEEK_SET){
+        f->off = offset;
+  }
+  if(position == SEEK_CUR){
+	f->off = f->off + offset;
+  }
+  else {
+	f->off = f->ip->size + offset;
+  }
+  if(f->off < f->ip->size){
+	return -1;
+  }
+  if(f->off > f->ip->size){
+	count = f->off - f->ip->size;
+	ptr = kalloc();
+	while(count > 0){
+		filewrite(f, ptr, count);
+		count = count - 4096;
+	}
+	kfree(ptr);
+  }
+  int x = f->off;
+  return x;
+}
