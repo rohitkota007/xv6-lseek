@@ -15,7 +15,6 @@
 #include "sleeplock.h"
 #include "file.h"
 #include "fcntl.h"
-#include "user.h"
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
@@ -444,38 +443,31 @@ sys_pipe(void)
   return 0;
 }
 
-int 
+
+int
 sys_lseek(void)
 {
+  int fd, offset, base, newoff, count;
   struct file *f;
-  signed int offset;
-  int position, count; 
-  int fd;
   char *ptr;
-  argfd(0, &fd, &f);
-  argint(1, &offset);
-  argint(2, &position);
-  if(position == SEEK_SET){
-        f->off = offset;
-  }
-  if(position == SEEK_CUR){
-	f->off = f->off + offset;
-  }
-  else {
-	f->off = f->ip->size + offset;
-  }
-  if(f->off < f->ip->size){
-	return -1;
-  }
-  if(f->off > f->ip->size){
-	count = f->off - f->ip->size;
-	ptr = kalloc();
-	while(count > 0){
-		filewrite(f, ptr, count);
-		count = count - 4096;
-	}
-	kfree(ptr);
-  }
-  int x = f->off;
-  return x;
+  if (argfd(0, &fd, &f) < 0 || argint(2, &base) < 0 || argint(1, &offset) < 0)
+      return -1;
+	if(base == 0)
+		newoff = offset;
+	else if(base == 1)
+		newoff = f->off + offset;
+	else	
+		newoff = f->ip->size + offset;
+	if(newoff > f->ip->size){
+	    count = newoff - f->ip->size;
+	    ptr = kalloc();
+	    while(count > 0){
+		 filewrite(f, ptr, count);
+		 count = count - 4096;
+	    }
+	    kfree(ptr);
+       }
+
+	f->off = newoff;
+	return newoff;
 }
